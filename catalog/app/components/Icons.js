@@ -167,3 +167,18 @@ export function IconCheck(props) {
     </svg>
   );
 }
+
+export function IconDownload(props) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
+      <path
+        d="M12 3v11M7 10.5 12 15l5-4.5M5 18.5h14"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}

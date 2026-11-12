@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { usePlayer } from './PlayerProvider';
 import { fmtTime, initials, tierClass as tierClassOf, tierLabel } from '@/lib/format';
 import { albumHref, artistHref, sourceLabel } from '@/lib/links';
-import { IconCheck, IconExternal, IconHeart, IconMore, IconPause, IconPlay, IconPlus } from './Icons';
+import { IconCheck, IconDownload, IconExternal, IconHeart, IconMore, IconPause, IconPlay, IconPlus } from './Icons';
 
 export const tierOf = (track) =>
   track?.tier ||
@@ -103,6 +103,31 @@ function TrackMenu({ track, onClose }) {
           <IconCheck style={{ width: 14, height: 14 }} />
         </button>
       </div>
+
+      {track.playback?.url ? (
+        <>
+          <div style={{ height: 1, background: '#ffffff14', margin: '4px 0' }} />
+          <button
+            type="button"
+            role="menuitem"
+            onClick={async () => {
+              const url = track.playback?.url;
+              if (!url) return;
+              try {
+                const folder = await window.tessera?.defaultDownloadFolder?.();
+                const safeName = String(track.title || 'track').replace(/[^a-z0-9-_ ]/gi, '_');
+                await window.tessera?.downloadTrack?.({ url, filename: `${safeName}.mp3`, folder });
+              } catch (error) {
+                /* the download bridge is only present in the desktop shell */
+              }
+              onClose();
+            }}
+          >
+            <IconDownload style={{ width: 14, height: 14 }} />
+            Download full track
+          </button>
+        </>
+      ) : null}
 
       {links.length ? (
         <>

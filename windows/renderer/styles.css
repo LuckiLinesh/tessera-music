@@ -1,0 +1,101 @@
+:root {
+  --bg: #121212;
+  --bg-elevated: #181818;
+  --bg-highlight: #282828;
+  --text: #ffffff;
+  --text-subdued: #b3b3b3;
+  --text-muted: #6a6a6a;
+  --accent: #1ed760;
+  --radius: 8px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Circular", "SpotifyMixUI", Helvetica, Arial, sans-serif;
+}
+
+body {
+  font-size: 14px;
+}
+
+#top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: var(--bg);
+}
+
+#brand {
+  font-size: 20px;
+  font-weight: 800;
+}
+
+#status {
+  color: var(--text-subdued);
+  font-size: 12px;
+}
+
+#main {
+  padding: 40px 20px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+#title {
+  font-size: 30px;
+  font-weight: 900;
+  margin: 0 0 8px;
+}
+
+#sub {
+  color: var(--text-subdued);
+  margin: 0 0 24px;
+}
+
+#actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.btn {
+  background: var(--text);
+  color: #000;
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: var(--accent);
+}
+
+#folder {
+  margin-bottom: 12px;
+  color: var(--text-subdued);
+  font-size: 13px;
+}
+
+#progress {
+  color: var(--accent);
+  font-size: 13px;
+}
+
+#hint {
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}

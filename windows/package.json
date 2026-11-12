@@ -1,0 +1,63 @@
+{
+  "name": "tessera-music-desktop",
+  "version": "0.1.0",
+  "description": "Tessera Music - Windows desktop app with downloader",
+  "main": "src/main/index.js",
+  "author": "Tessera project",
+  "license": "MIT",
+  "scripts": {
+    "dev": "electron .",
+    "start": "electron .",
+    "dist": "electron-builder --win"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.9"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "com.tessera.music",
+    "productName": "Tessera Music",
+    "copyright": "Copyright 2026 Tessera project",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "src/**/*",
+      "renderer/**/*",
+      "node_modules/**/*",
+      "package.json",
+      "!**/*.map",
+      "!**/*.d.ts"
+    ],
+    "extraResources": [
+      {
+        "from": "../catalog/.next/standalone",
+        "to": "catalog"
+      }
+    ],
+    "asar": true,
+    "compression": "maximum",
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "portable", "arch": ["x64"] }
+      ],
+      "icon": "build/icon.ico",
+      "artifactName": "TesseraMusic-${version}-Setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "commerce-students",
+      "repo": "tessera-music"
+    }
+  }
+}
