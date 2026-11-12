@@ -1,0 +1,10 @@
+{
+  "name": "tessera-music",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A working, login-free music player rebuilt from the open.spotify.com capture.",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "start": "node scripts/serve.mjs"
+  }
+}

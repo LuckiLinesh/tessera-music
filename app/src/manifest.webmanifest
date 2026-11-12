@@ -1,0 +1,19 @@
+{
+  "name": "Tessera — Web Player",
+  "short_name": "Tessera",
+  "description": "A login-free music player. Real streaming, no account, no paid tier.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
