@@ -173,8 +173,8 @@ export const searchTracks = async ({
     const items = mergeTracks(claims, { limit, query: term });
     const total = results.reduce((sum, result) => Math.max(sum, result.total || 0), items.length);
     const notes = [];
-    if (!hasYouTube()) notes.push('YouTube playback needs a free API key (see Sources).');
-    if (!hasJamendo()) notes.push('Jamendo full-length streaming needs a free client id.');
+    if (!hasYouTube()) notes.push('YouTube full songs need a free API key - add one in Settings.');
+    if (!hasJamendo()) notes.push('Jamendo full-length streaming needs a free client id (Settings).');
     if (page > 1 && hasYouTube()) notes.push('YouTube is searched on page 1 only to protect quota.');
 
     return {

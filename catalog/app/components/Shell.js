@@ -8,6 +8,7 @@ import { fmtTime, tierClass, tierLabel } from '@/lib/format';
 import {
   IconCompass,
   IconExternal,
+  IconGear,
   IconHeart,
   IconHome,
   IconLibrary,
@@ -88,6 +89,14 @@ function Sidebar() {
             </Link>
           );
         })}
+        <Link
+          href="/settings"
+          className={`nav-link${pathname.startsWith('/settings') ? ' is-active' : ''}`}
+          style={{ marginTop: 'auto' }}
+        >
+          <IconGear />
+          <span>Settings</span>
+        </Link>
       </div>
 
       <div className="panel sidebar__library">

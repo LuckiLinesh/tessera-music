@@ -5,6 +5,8 @@ contextBridge.exposeInMainWorld('tessera', {
   pickFolder: () => ipcRenderer.invoke('download:pickFolder'),
   openPath: (p) => ipcRenderer.invoke('shell:openPath', p),
   defaultDownloadFolder: () => ipcRenderer.invoke('app:downloadsPath'),
+  getSettings: () => ipcRenderer.invoke('settings:get'),
+  saveSettings: (values) => ipcRenderer.invoke('settings:set', values),
   onDownloadProgress: (cb) => {
     const handler = (_e, data) => cb(data);
     ipcRenderer.on('download:progress', handler);

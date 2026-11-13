@@ -14,6 +14,68 @@ const isDev = !app.isPackaged;
 const CATALOG_PORT = 3001;
 const CATALOG_URL = `http://127.0.0.1:${CATALOG_PORT}`;
 
+const SETTINGS_FILE = () => path.join(app.getPath('userData'), 'settings.json');
+
+function readSettings() {
+  try {
+    return JSON.parse(fs.readFileSync(SETTINGS_FILE(), 'utf8')) || {};
+  } catch {
+    return {};
+  }
+}
+
+function writeSettings(next) {
+  try {
+    fs.mkdirSync(path.dirname(SETTINGS_FILE()), { recursive: true });
+    fs.writeFileSync(SETTINGS_FILE(), JSON.stringify(next, null, 2), 'utf8');
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/* Hand a key to the already-running catalog server so it takes effect without a
+   restart. The header is the catalog's proof that the desktop shell sent it. */
+function pushSettingsToServer(settings) {
+  return new Promise((resolve) => {
+    const body = JSON.stringify({
+      youtubeKey: settings.youtubeKey || '',
+      jamendoId: settings.jamendoId || '',
+    });
+    const req = http.request(
+      {
+        host: '127.0.0.1',
+        port: CATALOG_PORT,
+        path: '/api/settings',
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'content-length': Buffer.byteLength(body),
+          'x-tessera-desktop': '1',
+        },
+        timeout: 8000,
+      },
+      (res) => {
+        let data = '';
+        res.on('data', (chunk) => (data += chunk));
+        res.on('end', () => {
+          try {
+            resolve(JSON.parse(data));
+          } catch {
+            resolve(null);
+          }
+        });
+      },
+    );
+    req.on('error', () => resolve(null));
+    req.on('timeout', () => {
+      req.destroy();
+      resolve(null);
+    });
+    req.end(body);
+  });
+}
+
 function serverEntryPath() {
   const candidates = [
     // Packaged: extraResources copies the standalone build to resources/catalog.
@@ -47,6 +109,9 @@ function startCatalogServer() {
         NODE_ENV: 'production',
         PORT: String(CATALOG_PORT),
         HOSTNAME: '127.0.0.1',
+        // Keys saved in Settings are handed back on every launch.
+        YOUTUBE_API_KEY: readSettings().youtubeKey || process.env.YOUTUBE_API_KEY || '',
+        JAMENDO_CLIENT_ID: readSettings().jamendoId || process.env.JAMENDO_CLIENT_ID || '',
       },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
@@ -174,6 +239,36 @@ ipcMain.handle('download:pickFolder', async () => {
 });
 
 ipcMain.handle('app:downloadsPath', () => app.getPath('downloads'));
+
+/* Settings: the catalog page asks the shell to persist a key, then the shell
+   forwards it to the local server so it applies immediately. Keys are only ever
+   read back as booleans - the renderer never receives the secret again. */
+ipcMain.handle('settings:get', () => {
+  const saved = readSettings();
+  return { hasYoutube: Boolean(saved.youtubeKey), hasJamendo: Boolean(saved.jamendoId) };
+});
+
+ipcMain.handle('settings:set', async (event, payload) => {
+  const saved = readSettings();
+  const next = { ...saved };
+  if (typeof payload?.youtubeKey === 'string') {
+    const key = payload.youtubeKey.trim();
+    if (key) next.youtubeKey = key;
+    else delete next.youtubeKey;
+  }
+  if (typeof payload?.jamendoId === 'string') {
+    const id = payload.jamendoId.trim();
+    if (id) next.jamendoId = id;
+    else delete next.jamendoId;
+  }
+  const persisted = writeSettings(next);
+  const state = await pushSettingsToServer(next);
+  return {
+    ok: persisted && Boolean(state?.ok),
+    youtube: Boolean(state?.youtube ?? next.youtubeKey),
+    jamendo: Boolean(state?.jamendo ?? next.jamendoId),
+  };
+});
 
 ipcMain.handle('shell:openPath', async (event, p) => {
   if (!p) return false;

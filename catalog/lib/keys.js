@@ -10,5 +10,18 @@ export const config = {
   audiusApp: process.env.AUDIUS_APP_NAME || 'TesseraCatalog',
 };
 
+/* The desktop app lets someone paste a key while it runs. Applying it here means
+   the next request already uses it - no restart, no rebuild. The Electron main
+   process also persists it and passes it back as env on the next launch. */
+export const applyKeys = (values = {}) => {
+  if (typeof values.youtubeKey === 'string' && values.youtubeKey.trim()) {
+    config.youtubeKey = values.youtubeKey.trim();
+  }
+  if (typeof values.jamendoId === 'string' && values.jamendoId.trim()) {
+    config.jamendoId = values.jamendoId.trim();
+  }
+  return { youtube: hasYouTube(), jamendo: hasJamendo() };
+};
+
 export const hasYouTube = () => Boolean(config.youtubeKey);
 export const hasJamendo = () => Boolean(config.jamendoId);
