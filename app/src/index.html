@@ -32,6 +32,7 @@
     <symbol id="i-volume" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.4v13.2L7.5 14.5H4zM15.4 8.2a5.4 5.4 0 0 1 0 7.6l-1.3-1.3a3.6 3.6 0 0 0 0-5zm2.6-2.6a9 9 0 0 1 0 12.8l-1.3-1.3a7.2 7.2 0 0 0 0-10.2z" fill="currentColor"/></symbol>
     <symbol id="i-mute" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.4v13.2L7.5 14.5H4zM15.3 9.4l1.4-1.4 2.1 2.1 2.1-2.1 1.4 1.4-2.1 2.1 2.1 2.1-1.4 1.4-2.1-2.1-2.1 2.1-1.4-1.4 2.1-2.1z" fill="currentColor"/></symbol>
     <symbol id="i-download" viewBox="0 0 24 24"><path d="M11 3h2v9.2l3.1-3.1 1.4 1.4L12 16l-5.5-5.5 1.4-1.4L11 12.2zM4 18h16v2.5H4z" fill="currentColor"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><path d="M10.6 2h2.8l.4 2.3c.5.15 1 .35 1.45.6l2-1.2 2 2-1.2 2c.25.45.45.95.6 1.45L21 9.6v2.8l-2.3.4c-.15.5-.35 1-.6 1.45l1.2 2-2 2-2-1.2c-.45.25-.95.45-1.45.6L13.4 22h-2.8l-.4-2.3c-.5-.15-1-.35-1.45-.6l-2 1.2-2-2 1.2-2c-.25-.45-.45-.95-.6-1.45L3 14.4v-2.8l2.3-.4c.15-.5.35-1 .6-1.45l-1.2-2 2-2 2 1.2c.45-.25.95-.45 1.45-.6zM12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7" fill="currentColor"/></symbol>
     <symbol id="i-left" viewBox="0 0 24 24"><path d="M14.5 4 7 12l7.5 8 1.5-1.4L9.9 12 16 5.4z" fill="currentColor"/></symbol>
     <symbol id="i-right" viewBox="0 0 24 24"><path d="M9.5 4 17 12l-7.5 8L8 18.6 14.1 12 8 5.4z" fill="currentColor"/></symbol>
     <symbol id="i-library" viewBox="0 0 24 24"><path d="M3 4h3v16H3zm5 0h3v16H8zm5.2.6 2.9-.8 4.1 15.4-2.9.8z" fill="currentColor"/></symbol>
@@ -65,6 +66,10 @@
 
     <div class="topbar__right">
       <a class="topbar__link" href="/download" data-link>Download</a>
+      <a class="round-btn" href="/settings" data-link title="Settings" aria-label="Settings" id="gearLink"
+         style="width:34px;height:34px">
+        <svg aria-hidden="true" style="width:18px;height:18px"><use href="#i-gear"/></svg>
+      </a>
       <span class="badge" title="No account, no paid tier">Free</span>
     </div>
   </header>

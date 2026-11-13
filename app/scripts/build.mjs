@@ -20,6 +20,7 @@ const routes = [
   'artist',
   'collection',
   'full',
+  'settings',
 ];
 
 fs.rmSync(outDir, { recursive: true, force: true });

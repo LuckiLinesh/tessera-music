@@ -2530,6 +2530,79 @@ const viewFull = async (genre) => {
   }
 };
 
+/* -"--"- settings -"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"- */
+const viewSettings = () => {
+  const id = spClientId();
+  const connected = spConnected();
+  const name = localStorage.getItem('tessera.spotify.name') || '';
+  const product = spProduct();
+  const redirect = spRedirect();
+  $('#main').innerHTML = `
+    <div class="view">
+      <div class="dl-hero">
+        <div class="dl-hero__brand"><svg aria-hidden="true"><use href="#i-gear"/></svg> Settings</div>
+        <h1>Playback</h1>
+        <p>Everything here works without an account. Spotify is the one optional extra: it has to run through
+        your own free developer app and a Premium subscription, because Spotify does not licence its masters
+        to anyone else. Without it you still get full-length independent and public-domain audio.</p>
+      </div>
+      <section style="max-width:760px;display:grid;gap:14px">
+        <h2 style="margin:0;font-size:20px">Spotify (optional)</h2>
+        <p style="margin:0;line-height:1.6;color:var(--muted)">
+          Create a free app at <a href="https://developer.spotify.com/dashboard" target="_blank" rel="noreferrer">developer.spotify.com/dashboard</a>,
+          add the redirect URI below to it, paste the client id here, then connect. Nothing is sent anywhere
+          except Spotify's own authorisation endpoints.
+        </p>
+        <label style="display:grid;gap:6px;font-size:13px;color:var(--muted)">
+          Client id
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <input id="setClient" value="${esc(id)}" placeholder="32-character client id" spellcheck="false"
+              style="flex:1;min-width:240px;background:var(--panel-2,#1f1f1f);border:1px solid #ffffff22;border-radius:8px;padding:10px 12px;color:#fff;font-size:14px" />
+            <button class="btn-primary" id="setSave" type="button">Save</button>
+          </div>
+        </label>
+        <label style="display:grid;gap:6px;font-size:13px;color:var(--muted)">
+          Redirect URI to add in Spotify
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <code style="flex:1;min-width:240px;background:#00000066;border:1px solid #ffffff14;border-radius:8px;padding:10px 12px;color:#fff;overflow:auto">${esc(redirect)}</code>
+            <button class="chip" id="setCopy" type="button">Copy</button>
+          </div>
+        </label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding-top:4px">
+          ${connected
+            ? `<button class="btn-primary" id="setConnect" type="button">Reconnect</button>
+               <button class="btn-ghost" id="setForget" type="button">Disconnect</button>
+               <span style="font-size:13px;color:var(--muted)">
+                 Connected${name ? ` as ${esc(name)}` : ''}${product ? ` - ${esc(product)}${product.toLowerCase() === 'premium' ? '' : ' (streaming needs Premium)'}` : ''}
+               </span>`
+            : `<button class="btn-primary" id="setConnect" type="button">Connect Spotify</button>
+               <span style="font-size:13px;color:var(--muted)">Not connected</span>`}
+        </div>
+      </section>
+    </div>`;
+
+  $('#setSave').addEventListener('click', () => {
+    const value = $('#setClient').value.trim();
+    if (value) localStorage.setItem(SPOTIFY_ID_KEY, value);
+    else localStorage.removeItem(SPOTIFY_ID_KEY);
+    toast(value ? 'Client id saved' : 'Client id cleared');
+    render();
+  });
+  $('#setCopy').addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(redirect);
+      toast('Redirect URI copied');
+    } catch {
+      toast('Copy failed - select the text instead');
+    }
+  });
+  $('#setConnect')?.addEventListener('click', () => spLogin());
+  $('#setForget')?.addEventListener('click', () => {
+    spForgot();
+    toast('Spotify disconnected');
+  });
+};
+
 const view404 = () => {
   $('#main').innerHTML = `
     <div class="view">
@@ -2561,6 +2634,7 @@ const render = () => {
   if (path === '/liked') return viewLiked();
   if (path === '/artist') return viewArtist(params.get('id'));
   if (path === '/collection') return viewCollection(params.get('type') || 'playlist', params.get('id'));
+  if (path === '/settings') return viewSettings();
   return view404();
 };
 
@@ -2930,6 +3004,24 @@ window.addEventListener('resize', closeMenu);
 /* -"--"- boot -"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"--"- */
 const boot = () => {
   render();
+
+  // Spotify sends the authorization code back to /settings.
+  const bootParams = new URLSearchParams(location.search);
+  const authCode = location.pathname === '/settings' ? bootParams.get('code') : '';
+  if (authCode) {
+    spFinishLogin(authCode)
+      .then((ok) => {
+        history.replaceState({}, '', '/settings');
+        toast(ok ? 'Spotify connected' : 'Spotify sign-in failed - check the client id and redirect URI');
+        render();
+        if (ok) spConnect().catch(() => {});
+      })
+      .catch(() => {
+        history.replaceState({}, '', '/settings');
+        toast('Spotify sign-in failed');
+        render();
+      });
+  }
 
   // Restore the last session so a reload keeps the song and the shelf.
   const last = store.last;
