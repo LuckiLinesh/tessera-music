@@ -8,7 +8,8 @@
   "scripts": {
     "dev": "electron .",
     "start": "electron .",
-    "dist": "electron-builder --win"
+    "prepare-catalog": "node scripts/prepare-catalog.mjs",
+    "dist": "node scripts/prepare-catalog.mjs && electron-builder --win"
   },
   "dependencies": {
     "electron-updater": "^6.3.9"
@@ -47,6 +48,9 @@
       ],
       "icon": "build/icon.ico",
       "artifactName": "TesseraMusic-${version}-Setup.${ext}"
+    },
+    "portable": {
+      "artifactName": "TesseraMusic-${version}-Portable.${ext}"
     },
     "nsis": {
       "oneClick": false,

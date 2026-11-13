@@ -16,8 +16,12 @@ const CATALOG_URL = `http://127.0.0.1:${CATALOG_PORT}`;
 
 function serverEntryPath() {
   const candidates = [
+    // Packaged: extraResources copies the standalone build to resources/catalog.
+    path.join(process.resourcesPath || '', 'catalog', 'server.js'),
     path.join(process.resourcesPath || '', 'catalog', '_next', 'standalone', 'server.js'),
     path.join(process.resourcesPath || '', '_next', 'standalone', 'server.js'),
+    // Running from the repo: windows/ -> catalog/.next/standalone.
+    path.join(__dirname, '..', '..', '..', 'catalog', '.next', 'standalone', 'server.js'),
     path.join(__dirname, '..', '..', 'catalog', '.next', 'standalone', 'server.js'),
   ];
   for (const candidate of candidates) {
@@ -36,9 +40,17 @@ function startCatalogServer() {
   return new Promise((resolve, reject) => {
     const child = spawn(process.execPath, [serverPath], {
       cwd: serverDir,
-      env: { ...process.env, PORT: String(CATALOG_PORT), HOSTNAME: '127.0.0.1' },
+      env: {
+        ...process.env,
+        // Make the Electron binary behave as plain Node for the child server.
+        ELECTRON_RUN_AS_NODE: '1',
+        NODE_ENV: 'production',
+        PORT: String(CATALOG_PORT),
+        HOSTNAME: '127.0.0.1',
+      },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
+    catalogServer = child;
     let out = '';
     child.stdout.on('data', (d) => {
       out += d;
@@ -163,8 +175,6 @@ ipcMain.handle('download:pickFolder', async () => {
 
 ipcMain.handle('app:downloadsPath', () => app.getPath('downloads'));
 
-ipcMain.handle('app:downloadsPath', () => app.getPath('downloads'));
-
 ipcMain.handle('shell:openPath', async (event, p) => {
   if (!p) return false;
   const r = await shell.openPath(p);
@@ -192,18 +202,16 @@ ipcMain.handle('update:install', () => {
 });
 
 app.whenReady().then(async () => {
-  createWindow();
-  setupAutoUpdate();
-
   if (!isDev) {
     try {
       await startCatalogServer();
-      mainWindow.webContents.loadURL(CATALOG_URL);
     } catch (e) {
       console.error('catalog server failed', e);
-      mainWindow.webContents.loadURL('about:blank');
     }
   }
+
+  createWindow();
+  setupAutoUpdate();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
@@ -212,4 +220,16 @@ app.whenReady().then(async () => {
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
+});
+
+// Don't leave the bundled catalog server running after the window closes.
+app.on('will-quit', () => {
+  if (catalogServer) {
+    try {
+      catalogServer.kill();
+    } catch {
+      /* already gone */
+    }
+    catalogServer = null;
+  }
 });

@@ -9,6 +9,9 @@ out/
 # Static app build output
 dist/
 
+# Desktop app build output
+windows/release/
+
 # Environment
 .env
 .env.local

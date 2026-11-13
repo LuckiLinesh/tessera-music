@@ -42,9 +42,11 @@ export function SourcePills({ sources = [], max = 3, statuses = {} }) {
 function TrackMenu({ track, onClose }) {
   const { library, addToPlaylist, createPlaylist, toggleLike, isLiked } = usePlayer();
   const [newName, setNewName] = useState('');
+  const [download, setDownload] = useState(null);
 
   const links = (track.links || []).filter((link) => link.href);
   const liked = isLiked(track);
+  const hasBridge = typeof window !== 'undefined' && Boolean(window.tessera?.downloadTrack);
 
   return (
     <div
@@ -110,22 +112,50 @@ function TrackMenu({ track, onClose }) {
           <button
             type="button"
             role="menuitem"
+            disabled={!hasBridge || download === 'downloading'}
+            title={hasBridge ? 'Save this licensed file to your Downloads folder' : 'Downloads are available in the Tessera desktop app'}
             onClick={async () => {
               const url = track.playback?.url;
               if (!url) return;
+              setDownload('downloading');
               try {
                 const folder = await window.tessera?.defaultDownloadFolder?.();
                 const safeName = String(track.title || 'track').replace(/[^a-z0-9-_ ]/gi, '_');
-                await window.tessera?.downloadTrack?.({ url, filename: `${safeName}.mp3`, folder });
+                const result = await window.tessera?.downloadTrack?.({
+                  url,
+                  filename: `${safeName}.mp3`,
+                  folder,
+                });
+                setDownload(result?.ok ? 'done' : 'error');
               } catch (error) {
-                /* the download bridge is only present in the desktop shell */
+                setDownload('error');
               }
-              onClose();
             }}
           >
             <IconDownload style={{ width: 14, height: 14 }} />
-            Download full track
+            {download === 'downloading'
+              ? 'Downloading…'
+              : download === 'done'
+                ? 'Saved to Downloads'
+                : download === 'error'
+                  ? 'Download failed – try again'
+                  : hasBridge
+                    ? 'Download full track'
+                    : 'Download (desktop app)'}
           </button>
+          {download === 'done' ? (
+            <button
+              type="button"
+              role="menuitem"
+              onClick={async () => {
+                const folder = await window.tessera?.defaultDownloadFolder?.();
+                if (folder) await window.tessera?.openPath?.(folder);
+              }}
+            >
+              <IconExternal style={{ width: 14, height: 14 }} />
+              Show in folder
+            </button>
+          ) : null}
         </>
       ) : null}
 

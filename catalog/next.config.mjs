@@ -11,6 +11,9 @@ const nextConfig = {
     // because those hosts already serve appropriately sized variants.
     unoptimized: true,
   },
+  // The Windows desktop app ships this server inside its resources and starts
+  // it on a local port, so it needs a self-contained standalone build.
+  output: 'standalone',
 };
 
 export default nextConfig;
